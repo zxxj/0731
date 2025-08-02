@@ -219,3 +219,25 @@ nest -h
 > 这就是`nest generate`, 可以快速生成各种代码
 >
 > 这些代码模板的集合是在@nestjs/schematics这个包里定义的,通过`nest new`创建项目的时候有个`--collection`选项就是配置这个的.
+
+- nest generate选项
+
+  1. --no-flat和--flat(默认), 生成文件时,是否生成对应目录,默认为--flat
+
+  ```js
+  // nest generate controller generateNoFlat --no-flat
+  ```
+
+  2. --no-spec和--spec, 生成文件时,是否生成对应的.spec测试文件,默认为--spec
+
+  ```js
+  // nest generate controller generateNoSpec --no-spec
+  ```
+
+  3. --skip-import,生成.module文件时,是否自动import到app.module.ts中,默认为自动import
+
+  ```js
+  // nest generate module generateSkipModule --skip-import
+  ```
+
+  4. --project,这个是指定生成代码在哪个子项目的,monorepo项目时才用得到

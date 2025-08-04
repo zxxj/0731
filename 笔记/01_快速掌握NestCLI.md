@@ -32,25 +32,21 @@ nest -h
   ```js
   nest new demo -g 
   ```
-
 - --skip-install => 简写为 -s (跳过安装依赖)
 
   ```js
   nest new demo -s
   ```
-
 - --package-manager => 简写为 -p (指定包管理器)
 
   ```js
   nest new demo -p pnpm
   ```
-
 - --language => 简写为 -l (指定nest项目使用JavaScript还是TypeScript)
 
   ```js
   nest new demo -l javascript
   ```
-
 - --strict (指定TypeScript的编译选项是否开启严格模式)
 
   ```js
@@ -70,7 +66,7 @@ nest -h
 
 > 生成controller/service/module等文件
 
-- 生成Module
+- ### 生成Module
 
   ```js
   // 1.运行如下命令
@@ -101,8 +97,7 @@ nest -h
   })
   export class AppModule {}
   ```
-
-- 生成Controller文件
+- ### 生成Controller文件
 
   ```js
   // 1.运行如下命令
@@ -151,8 +146,7 @@ nest -h
   })
   export class TestGenerateModule {}
   ```
-
-- 生成Service文件
+- ### 生成Service文件
 
   ```js
   // 1.运行如下命令
@@ -204,8 +198,7 @@ nest -h
   export class TestGenerateModule {}
   
   ```
-
-- 生成一个完整的模块
+- ### 生成一个完整的模块
 
   ```js
   // 1. 如果是要完整的生成一个模块的代码(包含 .module.ts,.controller.ts,.service.ts),不需要一个一个文件的生成,可以运行如下命令
@@ -220,24 +213,99 @@ nest -h
 >
 > 这些代码模板的集合是在@nestjs/schematics这个包里定义的,通过`nest new`创建项目的时候有个`--collection`选项就是配置这个的.
 
-- nest generate选项
+- ### nest generate选项
 
   1. --no-flat和--flat(默认), 生成文件时,是否生成对应目录,默认为--flat
 
   ```js
   // nest generate controller generateNoFlat --no-flat
   ```
-
   2. --no-spec和--spec, 生成文件时,是否生成对应的.spec测试文件,默认为--spec
 
   ```js
   // nest generate controller generateNoSpec --no-spec
   ```
-
   3. --skip-import,生成.module文件时,是否自动import到app.module.ts中,默认为自动import
 
   ```js
   // nest generate module generateSkipModule --skip-import
   ```
-
   4. --project,这个是指定生成代码在哪个子项目的,monorepo项目时才用得到
+
+## nest build
+
+> nest build是用于构建项目的, 执行`执行nest build`会在dist目录下生成编译后的代码
+
+- ### nest build选项
+
+  1. --webapck和--tsc
+
+  ```js
+  // --webpack 表示用webpack作为打包工具
+  pnpm run build --webpack
+  // --tsc 表示用tsc作为打包工具(默认)
+  pnpm run build --tsc
+  
+  // webpack和tsc的区别在于: tsc不做打包,webpack会做打包,两种方式都可以.
+  // node模块本来就不需要打包,但是打包成单模块能提升加载的性能.
+  ```
+
+  2. --watch
+
+  ```js
+  // 监听文件变动,自动build(默认只监听ts/js文件,需要监听其他文件需要手动加上--watchAssets,就会一并输出到dist目录,比如.md和.yml文件)
+  ```
+
+## nest-cli.json
+
+> 上面说的一些选项都可以在`nest-cli.json`文件中配置
+
+```js
+// nest-cli.json
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": true, // 设置为true表示每次build时,会先清空dist文件夹中的内容
+    "webpack": true, // 在这里设置webpack为true后,就相当于执行了 nest build --webpack, 反之 webpack设置为false,那就是使用tsc了
+    "assets": [
+      "**/*.css",
+      { "include": "**/*.html", "exclude": "**/aaa.html", "watchAssets":true}
+    ] // 表示在nest build的时候,把非js/ts文件也复制到dist目录下,可以通过include/exclude来精确匹配,并且可以单独指定是否watchAssets
+  },
+
+  // nest generate选项配置
+  "generateOptions": {
+    "spec": false, // 默认不生成测试文件,相当于 --no-spec
+    "flat": false, // 默认不生成目录, 相当于--no-flat
+  }
+}
+```
+
+## nest start
+
+> 用于启动项目
+
+### nest start选项
+
+1. --watch
+
+```js
+// --watch是最常用的选项了,也就是改动文件之后会自动重新build
+nest start --watch / pnpm run start:dev
+```
+
+2. --debug
+
+```js
+// --debug是启动调试的websocket服务,用来debug
+nest start --debug / pnpm run start:debug
+```
+
+3. --exec
+
+```js
+// --exec可以指定用什么来跑,默认是用node,也可以切换为其他的runtime
+```
+

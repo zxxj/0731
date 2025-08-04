@@ -287,7 +287,7 @@ nest -h
 
 > 用于启动项目
 
-### nest start选项
+nest start选项
 
 1. --watch
 
@@ -307,5 +307,12 @@ nest start --debug / pnpm run start:debug
 
 ```js
 // --exec可以指定用什么来跑,默认是用node,也可以切换为其他的runtime
+```
+
+## nest info
+
+```js
+// 用于查看项目信息,包括系统信息/node版本/npm版本等
+nest info
 ```
 

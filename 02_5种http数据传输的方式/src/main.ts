@@ -6,6 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.useStaticAssets('public', { prefix: '/assets' });
+  app.setGlobalPrefix('/api');
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

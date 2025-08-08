@@ -117,3 +117,20 @@ bootstrap();
 </html>
 ```
 
+## url param
+
+> url param是url中的参数,nest中通过 :参数名 的方式来声明(比如下面的id), 然后通过@Param(参数名)的装饰器取出来然后注入到Controller
+
+```js
+@Controller('person')
+export class PersonController {
+  constructor(private readonly personService: PersonService) {}
+
+  // @Controller('api/pseron)的路由和@Get('id)的路由会拼到一起,也就是只有/api/person/xxx的get请求才会命中这个方法
+  @Get(':id')
+  urlParamTest(@Param('id') id: string) {
+      return `id=${ id }`;
+  }
+}
+```
+

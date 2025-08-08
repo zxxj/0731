@@ -8,7 +8,16 @@
 </head>
 
 <body>
-	hello
+	<script src="https://unpkg.com/axios@0.24.0/dist/axios.min.js"></script>
+
+	<script>
+		async function urlParam() {
+			const res = await axios.get('/api/person/1')
+			console.log(res)
+		}
+
+		urlParam()
+	</script>
 </body>
 
 </html>

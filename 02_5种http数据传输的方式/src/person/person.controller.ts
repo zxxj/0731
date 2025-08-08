@@ -25,9 +25,10 @@ export class PersonController {
     return this.personService.findAll();
   }
 
+  // @Controller('api/pseron)的路由和@Get('id)的路由会拼到一起,也就是只有/api/person/xxx的get请求才会命中这个方法
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.personService.findOne(+id);
+  urlParamTest(@Param('id') id: string) {
+    return `id=${id}`;
   }
 
   @Patch(':id')

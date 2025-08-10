@@ -129,7 +129,7 @@ export class PersonController {
   // @Controller('api/pseron)的路由和@Get('id)的路由会拼到一起,也就是只有/api/person/xxx的get请求才会命中这个方法
   @Get(':id')
   urlParamTest(@Param('id') id: string) {
-      return `id=${ id }`;
+      return `id=${id}`;
   }
 }
 ```

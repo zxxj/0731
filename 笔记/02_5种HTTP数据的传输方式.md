@@ -121,6 +121,8 @@ bootstrap();
 
 > url param是url中的参数,nest中通过 :参数名 的方式来声明(比如下面的id), 然后通过@Param(参数名)的装饰器取出来然后注入到Controller
 
+- 后端实现
+
 ```js
 @Controller('person')
 export class PersonController {
@@ -132,5 +134,487 @@ export class PersonController {
       return `id=${id}`;
   }
 }
+```
+
+- 前端测试
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+
+<body>
+	<script src="https://unpkg.com/axios@0.24.0/dist/axios.min.js"></script>
+
+	<script>
+		async function urlParam() {
+			const res = await axios.get('/api/person/1')
+			console.log(res)
+		}
+
+		urlParam()
+	</script>
+</body>
+
+</html>
+```
+
+## query
+
+> query是url中 ? 后的字符串,需要做url encode, 在Nest中需要通过@Query装饰器来取参数
+
+- 后端实现
+
+
+```ts
+@Controller('person')
+export class PersonController {
+  constructor(private readonly personService: PersonService) {}
+
+  // 这个find路由要放到:id路由的前面,因为Nest是从上往下匹配的,如果放在后面,那么就会匹配到:id的路由了.
+  @Get('find')
+  testQuery(@Query('username') username: string, @Query('age') age: number) {
+    return `username: ${username}, age: ${age}`;
+  }
+
+  // @Controller('api/pseron)的路由和@Get('id)的路由会拼到一起,也就是只有/api/person/xxx的get请求才会命中这个方法
+  @Get(':id')
+  urlParamTest(@Param('id') id: string) {
+    return `id=${id}`;
+  }
+}
+```
+
+- 前端测试
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+
+<body>
+	<script src="https://unpkg.com/axios@0.24.0/dist/axios.min.js"></script>
+
+	<script>
+		async function urlParam() {
+			const res = await axios.get('/api/person/1')
+			console.log(res)
+		}
+
+		urlParam()
+
+		async function query() {
+			// const res = await axios.get('/api/person/find?username="xinxin"&age="18')
+            
+            // 参数通过params指定后,axios会做url encode,不需要自己做
+			const res = await axios.get('/api/person/find', {
+				params: {
+					username: "xinxin",
+					age: 18
+				}
+			})
+			console.log(res)
+		}
+
+		query()
+	</script>
+</body>
+
+</html>
+```
+
+## form urlencoded
+
+> form urlencoded是通过body传输数据,其实是把字符串放到了body里,所以需要做url encode
+>
+> 在Nest中用@Body装饰器接受参数,Nest会自动解析请求体,然后注入到dto中.
+>
+> dto是data transfer object, 就是用于封装传输的数据的对象 例如:
+>
+> export class CreateUserDto {
+>
+> ​	username: string
+>
+> ​	age: number
+>
+> }
+
+- 后端实现
+
+```ts
+// create-person.dto.ts
+export class CreatePersonDto {
+  username: string;
+  age: number;
+  height: number;
+}
+```
+
+```ts
+// person.controller.ts
+
+@Controller('person')
+export class PersonController {
+  constructor(private readonly personService: PersonService) {}
+
+  @Get('find')
+  testQuery(@Query('username') username: string, @Query('age') age: number) {
+    return `username: ${username}, age: ${age}`;
+  }
+
+  // @Controller('api/pseron)的路由和@Get('id)的路由会拼到一起,也就是只有/api/person/xxx的get请求才会命中这个方法
+  @Get(':id')
+  urlParamTest(@Param('id') id: string) {
+    return `id=${id}`;
+  }
+
+  @Post()
+  formURLEncoded(@Body() createPersonDto: CreatePersonDto) {
+    return `obj: ${JSON.stringify(createPersonDto)}`;
+  }
+}
+```
+
+- 前端测试
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+
+<body>
+	<script src="https://unpkg.com/axios@0.24.0/dist/axios.min.js"></script>
+	<script src="https://unpkg.com/qs@6.10.2/dist/qs.js"></script>
+
+	<script>
+		async function urlParam() {
+			const res = await axios.get('/api/person/1')
+			console.log(res)
+		}
+
+		urlParam()
+
+
+		async function query() {
+			// const res = await axios.get('/api/person/find?username="xinxin"&age="18')
+			const res = await axios.get('/api/person/find', {
+				params: {
+					username: "xinxin",
+					age: 18
+				}
+			})
+			console.log(res)
+		}
+
+		query()
+
+		async function formURLEncoded() {
+            // 通过Qs做encode
+			const res = await axios.post('/api/person', Qs.stringify({
+				username: "zxx",
+				age: 18,
+				height: 1.88
+			}),
+				{
+					headers: { 'content-type': 'application/x-www-form-urlencoded' }
+				}
+			)
+
+			console.log(res)
+		}
+
+		formURLEncoded()
+	</script>
+</body>
+
+</html>
+```
+
+## json
+
+> json需要将content-type指定为application/json,表示传输的内容会以json格式传输.
+>
+> form urlencoded和json方式都是从@Body装饰器取值,Nest内部会根据content-type做区分,使用不同的解析方式.
+
+- 后端实现
+
+```ts
+@Controller('person')
+export class PersonController {
+  constructor(private readonly personService: PersonService) {}
+
+  // query参数
+  @Get('find')
+  testQuery(@Query('username') username: string, @Query('age') age: number) {
+    return `username: ${username}, age: ${age}`;
+  }
+
+  // url param参数
+  // @Controller('api/pseron)的路由和@Get('id)的路由会拼到一起,也就是只有/api/person/xxx的get请求才会命中这个方法
+  @Get(':id')
+  urlParamTest(@Param('id') id: string) {
+    return `id=${id}`;
+  }
+
+  // form urlencoded参数
+  @Post()
+  formURLEncoded(@Body() createPersonDto: CreatePersonDto) {
+    return `obj: ${JSON.stringify(createPersonDto)}`;
+  }
+
+  // json
+  @Post('testJson')
+  json(@Body() CreatePersonDto: CreatePersonDto) {
+    return `json: ${JSON.stringify(CreatePersonDto)}`;
+  }
+}
+```
+
+- 前端测试
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+
+<body>
+	<script src="https://unpkg.com/axios@0.24.0/dist/axios.min.js"></script>
+	<script src="https://unpkg.com/qs@6.10.2/dist/qs.js"></script>
+
+	<script>
+		async function urlParam() {
+			const res = await axios.get('/api/person/1')
+			console.log(res)
+		}
+
+		urlParam()
+
+
+		async function query() {
+			// const res = await axios.get('/api/person/find?username="xinxin"&age="18')
+			const res = await axios.get('/api/person/find', {
+				params: {
+					username: "xinxin",
+					age: 18
+				}
+			})
+			console.log(res)
+		}
+
+		query()
+
+		async function formURLEncoded() {
+			const res = await axios.post('/api/person', Qs.stringify({
+				username: "zxx",
+				age: 18,
+				height: 1.88
+			}),
+				{
+					headers: { 'content-type': 'application/x-www-form-urlencoded' }
+				}
+			)
+
+			console.log(res)
+		}
+
+		formURLEncoded()
+
+        // 默认传输json就会指定content-type为application/json,不需要手动指定.
+		async function json() {
+			const res = await axios.post('/api/person/testJson', {
+				username: "xin",
+				age: 20,
+				height: 1.99
+			},
+				{
+					// headers: { 'content-type': 'application/json' }
+				}
+			)
+			console.log(res)
+		}
+
+		json()
+	</script>
+</body>
+
+</html>
+```
+
+## form data
+
+> form data使用--------作为boundary分隔传输的内容的.
+>
+> Nest解析form data使用FilesInterceptor拦截器,用@UseInterceptors装饰器启用,然后通过@UploadedFiles装饰器取出参数.
+>
+> 注意: 非文件格式的内容,同样也是通过@Body装饰器来取出参数.
+
+- 后端实现
+
+```ts
+@Controller('person')
+export class PersonController {
+  constructor(private readonly personService: PersonService) {}
+
+  // query参数
+  @Get('find')
+  testQuery(@Query('username') username: string, @Query('age') age: number) {
+    return `username: ${username}, age: ${age}`;
+  }
+
+  // url param参数
+  // @Controller('api/pseron)的路由和@Get('id)的路由会拼到一起,也就是只有/api/person/xxx的get请求才会命中这个方法
+  @Get(':id')
+  urlParamTest(@Param('id') id: string) {
+    return `id=${id}`;
+  }
+
+  // form urlencoded参数
+  @Post()
+  formURLEncoded(@Body() createPersonDto: CreatePersonDto) {
+    return `obj: ${JSON.stringify(createPersonDto)}`;
+  }
+
+  // json
+  @Post('testJson')
+  json(@Body() CreatePersonDto: CreatePersonDto) {
+    return `json: ${JSON.stringify(CreatePersonDto)}`;
+  }
+
+  // form data
+  @Post('upload')
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      dest: 'uploads/',
+    }),
+  )
+  formData(
+    @Body() createPersonDto: CreatePersonDto,
+    @UploadedFiles() files: Array<Express.Multer.File>, // 需要先安装 @types/multer才可以使用
+  ) {
+    console.log('files:', files);
+    return `obj: ${JSON.stringify(createPersonDto)}`;
+  }
+}
+```
+
+- 前端测试
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+
+<body>
+	<script src="https://unpkg.com/axios@0.24.0/dist/axios.min.js"></script>
+	<script src="https://unpkg.com/qs@6.10.2/dist/qs.js"></script>
+
+	<input type="file" id="fileInput" multiple>
+
+	<script>
+
+		// url param
+		async function urlParam() {
+			const res = await axios.get('/api/person/1')
+			console.log(res)
+		}
+
+		urlParam()
+
+
+		// query
+		async function query() {
+			// const res = await axios.get('/api/person/find?username="xinxin"&age="18')
+			const res = await axios.get('/api/person/find', {
+				params: {
+					username: "xinxin",
+					age: 18
+				}
+			})
+			console.log(res)
+		}
+
+		query()
+
+		// form-urlencoded
+		async function formURLEncoded() {
+			const res = await axios.post('/api/person', Qs.stringify({
+				username: "zxx",
+				age: 18,
+				height: 1.88
+			}),
+				{
+					headers: { 'content-type': 'application/x-www-form-urlencoded' }
+				}
+			)
+
+			console.log(res)
+		}
+
+		formURLEncoded()
+
+		// json
+		async function json() {
+			const res = await axios.post('/api/person/testJson', {
+				username: "xin",
+				age: 20,
+				height: 1.99
+			},
+				{
+					// headers: { 'content-type': 'application/json' }
+				}
+			)
+			console.log(res)
+		}
+
+		json()
+
+		// form data
+		const fileInput = document.querySelector("#fileInput")
+
+		async function formData() {
+			const data = new FormData()
+			data.set('username', 'zxx')
+			data.set('age', 19)
+			data.set('height', 1.99)
+			data.set('file1', fileInput.files[0])
+			data.set('file2', fileInput.files[1])
+
+			const res = await axios.post('/api/person/upload', data, {
+				headers: { 'content-type': 'multipart/form-data' }
+			})
+
+			console.log(res)
+		}
+
+		fileInput.onchange = formData
+	</script>
+</body>
+
+</html>
 ```
 

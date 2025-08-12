@@ -1,0 +1,23 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+{
+    "type": "node",
+    "request": "launch",
+    "name": "debug nest",
+    "runtimeExecutable": "npm", // 代表执行什么命令,args传参数
+    "args": [
+        "run",
+        "start:dev",
+    ],
+    "skipFiles": [
+        "<node_internals>/**"
+    ],
+		"cwd": "F:/A/0731/05_如何调试nest项目",  // 一定要指定当前项目所在的文件夹
+    "console": "integratedTerminal", // 要指定为integratedTerminal,也就是用vscode的内置终端来打印日志,不然默认会用debug console跑,那个没有颜色.
+}
+	]
+}

@@ -57,13 +57,3 @@
 > 其实express的中间件的洋葱模型也是一种AOP的实现,因为你可以透明的在外面包一层,加入一些逻辑,内层感知不到.
 >
 > 而Nest实现AOP的方式更多,一共有五种: Middleware, Guard, Pipe, Interceptor, ExceptionFilter.
-
-# 实现Nest中的5种AOP方式
-
-## 创建项目
-
-```markdown
-nest new 09_理解mvc和aop架构-实现nest中的5种aop方式 -s -g -p pnpm
-```
-
-2.
